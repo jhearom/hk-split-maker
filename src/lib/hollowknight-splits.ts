@@ -1,6 +1,7 @@
 import splits from "../asset/hollowknight/splits.txt";
 import ddsplits from "../asset/dd/dd-splits.json";
 import Icons from "../asset/hollowknight/icons/icons";
+import DDIcons from "../asset/dd/icons/icons";
 
 const SPLITS_DEFINITIONS_REGEXP =
   /\[Description\("(?<description>.+)"\), ToolTip\("(?<tooltip>.+)"\)\]\s+(?<id>\w+),/g;
@@ -248,6 +249,9 @@ export function getSelectOptionGroups(): Array<SelectOptionGroup> {
 export function getIconURLs(): Map<string, string> {
   const result = new Map<string, string>();
   for (const [key, url] of Object.entries(Icons)) {
+    result.set(key, url);
+  }
+  for (const [key, url] of Object.entries(DDIcons)) {
     result.set(key, url);
   }
   return result;
