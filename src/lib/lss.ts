@@ -31,30 +31,27 @@ function boolRepr(bool: boolean): string {
 
 function getSegmentNode(name: string, iconData?: string): xml.XmlObject {
   const iconNode: xml.XmlObject = {
-    Icon: iconData ? { _cdata: iconData, } : "",
+    Icon: iconData ? { _cdata: iconData } : "",
   };
-  return { Segment: [
-    { Name: name, },
-    iconNode,
-    { SplitTimes: [
-      { SplitTime: { _attr: { name: "Personal Best", }, }, }
-    ], },
-    { BestSegmentTime: "", },
-    { SegmentHistory: "", }
-  ], };
-}
-
-function getVariableNode(name: string, value: string): xml.XmlObject {
   return {
-    Variable: [
-      { _attr: { name, }, },
-      value
+    Segment: [
+      { Name: name },
+      iconNode,
+      { SplitTimes: [{ SplitTime: { _attr: { name: "Personal Best" } } }] },
+      { BestSegmentTime: "" },
+      { SegmentHistory: "" },
     ],
   };
 }
 
+function getVariableNode(name: string, value: string): xml.XmlObject {
+  return {
+    Variable: [{ _attr: { name } }, value],
+  };
+}
+
 function getVariablesNode(config: Config): xml.XmlObject {
-  const variablesNode = { Variables: [] as Array<xml.XmlObject>, };
+  const variablesNode = { Variables: [] as Array<xml.XmlObject> };
 
   if (config.variables?.glitch) {
     const glitchAttrName = `${config.categoryName} Glitch`;
@@ -72,17 +69,18 @@ function getVariablesNode(config: Config): xml.XmlObject {
 }
 
 function getMetadataNode(config: Config): xml.XmlObject {
-  const platformAttr = { _attr: { usesEmulator: boolRepr(false), }, };
-  const platformNode = config.variables?.platform ?
-    { Platform: [ platformAttr, config.variables.platform ], } :
-    { Platform: platformAttr, };
+  const platformAttr = { _attr: { usesEmulator: boolRepr(false) } };
+  const platformNode = config.variables?.platform
+    ? { Platform: [platformAttr, config.variables.platform] }
+    : { Platform: platformAttr };
 
-
-  return { Metadata: [
-    { Run: { _attr: { id: "", }, }, },
-    platformNode,
-    getVariablesNode(config)
-  ], };
+  return {
+    Metadata: [
+      { Run: { _attr: { id: "" } } },
+      platformNode,
+      getVariablesNode(config),
+    ],
+  };
 }
 
 export async function createSplitsXml(config: Config): Promise<string> {
@@ -103,7 +101,7 @@ export async function createSplitsXml(config: Config): Promise<string> {
   const liveSplitIconData = new Map<string, string>();
 
   const splitIdCount = new Map<string, number>();
-  const parsedSplitIds = splitIds.map(splitId => {
+  const parsedSplitIds = splitIds.map((splitId) => {
     let autosplitId = splitId;
     let subsplit = false;
     let name = "";
@@ -128,7 +126,9 @@ export async function createSplitsXml(config: Config): Promise<string> {
 
     const splitDefinition = splitDefinitions.get(autosplitId);
     if (!splitDefinition) {
-      throw new Error(`Failed to find a definition for split id ${autosplitId}`);
+      throw new Error(
+        `Failed to find a definition for split id ${autosplitId}`
+      );
     }
 
     if (!splitIdCount.has(autosplitId)) {
@@ -141,8 +141,7 @@ export async function createSplitsXml(config: Config): Promise<string> {
       let nameTemplate = "";
       if (typeof nameOverride === "string") {
         nameTemplate = nameOverride;
-      }
-      else {
+      } else {
         nameTemplate = nameOverride[currentSplitIdCount];
       }
       if (nameTemplate) {
@@ -158,8 +157,7 @@ export async function createSplitsXml(config: Config): Promise<string> {
     const iconOverride = icons && icons[autosplitId];
     if (typeof iconOverride === "string") {
       iconId = iconOverride;
-    }
-    else if (iconOverride?.length) {
+    } else if (iconOverride?.length) {
       iconId = iconOverride[currentSplitIdCount];
     }
 
@@ -172,7 +170,7 @@ export async function createSplitsXml(config: Config): Promise<string> {
     };
   });
 
-  parsedSplitIds.forEach(({ iconId, }) => {
+  parsedSplitIds.forEach(({ iconId }) => {
     const url = allIconURLs.get(iconId);
     if (url) {
       iconURLsToFetch.add(url);
@@ -186,19 +184,18 @@ export async function createSplitsXml(config: Config): Promise<string> {
   }
 
   await Promise.all(
-    [...iconURLsToFetch].map(async url => {
+    [...iconURLsToFetch].map(async (url) => {
       try {
         const iconData = await createLiveSplitIconData(url);
         liveSplitIconData.set(url, iconData);
-      }
-      catch (e) {
+      } catch (e) {
         console.error(`Failed to create icon data for ${url}`);
         console.error(e);
       }
     })
   );
 
-  const segments = parsedSplitIds.map(({ subsplit, name, iconId, }) => {
+  const segments = parsedSplitIds.map(({ subsplit, name, iconId }) => {
     const iconURL = allIconURLs.get(iconId);
     let icon = "";
     if (iconURL) {
@@ -216,45 +213,42 @@ export async function createSplitsXml(config: Config): Promise<string> {
       if (url) {
         icon = liveSplitIconData.get(url) ?? "";
       }
-
     }
     segments.push(getSegmentNode(endingSplitName, icon));
   }
 
-  const autosplits = parsedSplitIds
-    .map(({ autosplitId, }) => {
-      return { Split: autosplitId, };
-    });
-
-  const AutoSplitterSettings = gameName === "Death's Door" ? [
-    { Start: 1, },
-    { Reset: 1, },
-    { Options: "", },
-    { Splits: autosplits, }
-  ] : [
-    { Ordered: boolRepr(ordered), },
-    { AutosplitEndRuns: boolRepr(endTriggeringAutosplit), },
-    { AutosplitStartRuns: config.startTriggeringAutosplit ?? "", },
-    { Splits: autosplits, }
-  ];
-
-
-  return xml({
-    Run: [
-      { _attr: { version: "1.7.0", }, },
-      { GameIcon: "", },
-      { GameName: gameName, },
-      { CategoryName: categoryName, },
-      getMetadataNode(config),
-      { Offset: "00:00:00", },
-      { AttemptCount: "0", },
-      { AttemptHistory: "", },
-      { Segments: segments, },
-      { AutoSplitterSettings, }
-    ],
-  }, {
-    declaration: true,
-    indent: "  ",
+  const autosplits = parsedSplitIds.map(({ autosplitId }) => {
+    return { Split: autosplitId };
   });
 
+  const AutoSplitterSettings =
+    gameName === "Death's Door"
+      ? [{ Start: 1 }, { Reset: 1 }, { Options: "" }, { Splits: autosplits }]
+      : [
+          { Ordered: boolRepr(ordered) },
+          { AutosplitEndRuns: boolRepr(endTriggeringAutosplit) },
+          { AutosplitStartRuns: config.startTriggeringAutosplit ?? "" },
+          { Splits: autosplits },
+        ];
+
+  return xml(
+    {
+      Run: [
+        { _attr: { version: "1.7.0" } },
+        { GameIcon: "" },
+        { GameName: gameName },
+        { CategoryName: categoryName },
+        getMetadataNode(config),
+        { Offset: "00:00:00" },
+        { AttemptCount: "0" },
+        { AttemptHistory: "" },
+        { Segments: segments },
+        { AutoSplitterSettings },
+      ],
+    },
+    {
+      declaration: true,
+      indent: "  ",
+    }
+  );
 }
