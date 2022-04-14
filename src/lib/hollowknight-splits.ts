@@ -186,7 +186,7 @@ export function parseSplitsDefinitions(): Map<string, SplitDefinition> {
     return splitDefinitions;
   }
   const matches = splits.matchAll(SPLITS_DEFINITIONS_REGEXP);
-  splitDefinitions = new Map<string, SplitDefinition>();
+  const hkDefinitions = new Map<string, SplitDefinition>();
   for (const match of matches) {
     if (!match.groups) {
       throw new Error("RegExp match must have groups");
@@ -194,7 +194,7 @@ export function parseSplitsDefinitions(): Map<string, SplitDefinition> {
 
     const { description, id, tooltip } = match.groups;
     const [name, group] = getNameAndGroup({ description, id });
-    splitDefinitions.set(id, {
+    hkDefinitions.set(id, {
       description,
       id,
       tooltip: tooltip.replace("\\n", ".\n"),
@@ -205,7 +205,8 @@ export function parseSplitsDefinitions(): Map<string, SplitDefinition> {
 
   const ddDefinitions = parseDDSplitsDefinitions();
 
-  return new Map([...splitDefinitions, ...ddDefinitions]);
+  splitDefinitions = new Map([...hkDefinitions, ...ddDefinitions]);
+  return splitDefinitions;
 }
 
 function getGroupedSplitDefinitions() {
