@@ -20,16 +20,16 @@ const { $id: schemaId } = SplitConfigSchema;
 
 const modelUri = Uri.parse(schemaId);
 function handleEditorWillMount(monaco: Monaco) {
-  monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-    validate: true,
-    schemas: [
-      {
-        uri: schemaId,
-        fileMatch: [modelUri.toString()],
-        schema: SplitConfigSchema,
-      },
-    ],
-  });
+  // monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+  //   validate: true,
+  //   schemas: [
+  //     {
+  //       uri: schemaId,
+  //       fileMatch: [modelUri.toString()],
+  //       schema: SplitConfigSchema,
+  //     },
+  //   ],
+  // });
 }
 
 const splitDefinitions = parseSplitsDefinitions();
@@ -237,7 +237,7 @@ export default function SplitConfigEditor(props: Props): ReactElement {
         <SplitSelect onChange={onChangeSplitSelect} />
         <div className="hk-split-maker-monaco-editor">
           <Editor
-            defaultLanguage="json"
+            // defaultLanguage="json"
             defaultValue={props.defaultValue}
             value={splitConfig}
             onChange={onChange}
