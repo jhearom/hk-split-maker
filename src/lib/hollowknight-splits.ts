@@ -1,5 +1,5 @@
 import splits from "../asset/hollowknight/splits.txt";
-import ddsplits from "../asset/dd-splits.json";
+import ddsplits from "../asset/dd/dd-splits.json";
 import Icons from "../asset/hollowknight/icons/icons";
 
 const SPLITS_DEFINITIONS_REGEXP =
