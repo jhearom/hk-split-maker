@@ -91,7 +91,10 @@
     },
     {
       "fileName": "any-ss",
-      "displayName": "Any% Steel Soul"
+      "displayName": "Any% Steel Soul",
+      "data": {
+        "routeNotesURL": "https://pastebin.com/B9QT22zE"
+      }
     },
     {
       "fileName": "low",
@@ -306,7 +309,7 @@
       "fileName": "12ms",
       "displayName": "12 Mask Shards",
       "data": {
-        "routeNotesURL": "https://pastebin.com/uKqKzqqM"
+        "routeNotesURL": "https://pastebin.com/RUmPctix"
       }
     },
     {
@@ -318,6 +321,13 @@
           "All",
           "Skulls"
         ]
+      }
+    },
+    {
+      "fileName": "5-mimics",
+      "displayName": "5 Mimics",
+      "data": {
+        "routeNotesURL": "https://pastebin.com/0KVWK3cg"
       }
     },
     {

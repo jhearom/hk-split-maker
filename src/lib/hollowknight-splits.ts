@@ -126,6 +126,8 @@ function getNameAndGroup({
       return ["Lurien", qualifier];
     case "Monomon":
       return ["Monomon", qualifier];
+    case "PureSnail":
+      return ["Pure Snail", qualifier];
     default:
       break;
   }
